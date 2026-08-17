@@ -8,14 +8,41 @@
     <h1>Welcome to Dealer Evaluation Dashboard</h1>
     <label for="productSelect">Select Product:</label>
     <select id="productSelect">
+        <option value="">--Select Product--</option>
         <option value="1">Honey Lemon</option>
         <option value="2">Lemon Salad</option>
         <option value="3">Lemon Dessert</option>
     </select>
-    <div id="dealerResults"></div>
+    <div id="dealerResults" style="margin-top: 20px;"></div>
+
     <script>
-        const PRODUCT_API = "https://product-details.us-south.codeengine.appdomain.cloud";
-        const DEALER_API = "https://dealer-pricing.us-south.codeengine.appdomain.cloud";
+        const PRODUCT_API = "https://product-details-lf4q.onrender.com";
+        const DEALER_API = "https://dealer-pricing-c0xv.onrender.com";
+
+        document.getElementById('productSelect').addEventListener('change', async function() {
+            const productId = this.value;
+            const resultsDiv = document.getElementById('dealerResults');
+            resultsDiv.innerHTML = '';
+
+            if (!productId) return;
+
+            try {
+                const response = await fetch(`${DEALER_API}/dealers/${productId}`);
+                if (!response.ok) throw new Error('Failed to fetch dealers');
+                
+                const dealers = await response.json();
+                
+                let html = '<h3>Available Dealers & Prices:</h3><ul>';
+                dealers.forEach(item => {
+                    html += `<li><strong>${item.dealer}</strong>: ${item.price}</li>`;
+                });
+                html += '</ul>';
+                resultsDiv.innerHTML = html;
+            } catch (error) {
+                resultsDiv.innerHTML = '<p style="color: red;">Error loading dealer prices.</p>';
+                console.error(error);
+            }
+        });
     </script>
 </body>
 </html>
