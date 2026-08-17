@@ -12,11 +12,12 @@
         <option value="1">Honey Lemon</option>
         <option value="2">Lemon Salad</option>
         <option value="3">Lemon Dessert</option>
+        <option value="all">All Dealers</option>
     </select>
     <div id="dealerResults" style="margin-top: 20px;"></div>
 
     <script>
-        const PRODUCT_API = "https://product-details-lf4q.onrender.com";
+        const PRODUCT_API = "https://product-details-1f4q.onrender.com";
         const DEALER_API = "https://dealer-pricing-c0xv.onrender.com";
 
         document.getElementById('productSelect').addEventListener('change', async function() {
@@ -27,20 +28,29 @@
             if (!productId) return;
 
             try {
-                const response = await fetch(`${DEALER_API}/dealers/${productId}`);
-                if (!response.ok) throw new Error('Failed to fetch dealers');
-                
-                const dealers = await response.json();
-                
-                let html = '<h3>Available Dealers & Prices:</h3><ul>';
-                dealers.forEach(item => {
-                    html += `<li><strong>${item.dealer}</strong>: ${item.price}</li>`;
-                });
-                html += '</ul>';
-                resultsDiv.innerHTML = html;
-            } catch (error) {
+                if (productId === 'all') {
+                    const response = await fetch(`${DEALER_API}/dealers`);
+                    const allDealers = await response.json();
+                    let html = '<h3>All Dealers & Prices:</h3><ul>';
+                    for (const [id, dealersList] of Object.entries(allDealers)) {
+                        dealersList.forEach(d => {
+                            html += `<li>Product ${id} - <strong>${d.dealer}</strong>: ${d.price}</li>`;
+                        });
+                    }
+                    html += '</ul>';
+                    resultsDiv.innerHTML = html;
+                } else {
+                    const response = await fetch(`${DEALER_API}/dealers/${productId}`);
+                    const dealers = await response.json();
+                    let html = '<h3>Available Dealers & Prices:</h3><ul>';
+                    dealers.forEach(d => {
+                        html += `<li><strong>${d.dealer}</strong>: ${d.price}</li>`;
+                    });
+                    html += '</ul>';
+                    resultsDiv.innerHTML = html;
+                }
+            } catch (err) {
                 resultsDiv.innerHTML = '<p style="color: red;">Error loading dealer prices.</p>';
-                console.error(error);
             }
         });
     </script>
